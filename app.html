@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SitSheet - the sitter brief you write once</title>
+<style>
+  :root { --ink:#1c2b26; --muted:#6b7a73; --accent:#2f6f5e; --accent-dk:#265c4e; --card:#ffffff; --bg:#f4f6f3; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:680px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:28px; margin:0 0 6px; }
+  h2 { font-size:17px; margin:0 0 10px; }
+  .tag { color:var(--muted); margin:0 0 20px; line-height:1.45; }
+  .card { background:var(--card); border:1px solid #e3e8e4; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:8px; }
+  label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  input, select { padding:9px 10px; border:1px solid #d4dcd6; border-radius:8px; font-size:15px; background:#fff; }
+  input[type=text] { width:180px; }
+  button { padding:10px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; font-size:15px; cursor:pointer; }
+  button:hover { background:var(--accent-dk); }
+  button.ghost { background:#eef1ee; color:var(--ink); }
+  button.ghost:hover { background:#e2e7e2; }
+  .gaps { background:#f6ecd2; color:#8a6a14; border-radius:10px; padding:10px 14px; font-size:13px; margin-bottom:14px; line-height:1.6; }
+  .sheet { background:#fffdf7; border:1px solid #e8e2d2; border-radius:10px; padding:22px; font-size:14px; }
+  .sheet h3 { margin:14px 0 6px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); }
+  .sheet h3:first-child { margin-top:0; }
+  .sheet .line { padding:4px 0; line-height:1.5; }
+  .hidden { display:none; }
+  @media print {
+    body * { visibility:hidden; }
+    #sheet, #sheet * { visibility:visible; }
+    #sheet { position:absolute; left:0; top:0; width:100%; border:0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>SitSheet</h1>
+  <p class="tag">Every trip starts with retyping the same instructions. SitSheet keeps your house profile - pets, feeding, vet, plants, wifi, quirks, contacts - and prints a clean one-page brief for each sit. Fill it in once, travel forever.</p>
+
+  <div class="card">
+    <h2>Pets</h2>
+    <div class="row">
+      <div><label>Name</label><input type="text" id="petName" placeholder="Rex"></div>
+      <div><label>Kind</label><input type="text" id="petKind" placeholder="dog" style="width:90px"></div>
+      <div><label>Feeding</label><input type="text" id="petFeeding" placeholder="1 cup kibble, 7am + 6pm" style="width:200px"></div>
+    </div>
+    <div class="row">
+      <div><label>Meds (optional)</label><input type="text" id="petMeds" placeholder="Apoquel with breakfast" style="width:180px"></div>
+      <div><label>Notes (optional)</label><input type="text" id="petNotes" placeholder="scared of the vacuum" style="width:180px"></div>
+      <button id="addPet">Add pet</button>
+    </div>
+    <div id="petList" style="color:var(--muted); font-size:14px; margin-top:6px"></div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Vet name</label><input type="text" id="vetName" placeholder="Dr. Hale"></div>
+      <div><label>Vet phone</label><input type="text" id="vetPhone" placeholder="03-555-1234" style="width:140px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The house</h2>
+    <div class="row">
+      <div><label>Wifi network</label><input type="text" id="wifiName" placeholder="HomeNet" style="width:140px"></div>
+      <div><label>Wifi password</label><input type="text" id="wifiPass" placeholder="sunny42" style="width:140px"></div>
+      <div><label>Trash goes out</label><input type="text" id="trashDay" placeholder="Tuesday night" style="width:140px"></div>
+    </div>
+    <div class="row">
+      <div><label>Plants</label><input type="text" id="plants" placeholder="Ferns get a cup every 3 days" style="width:300px"></div>
+      <div><label>Quirks</label><input type="text" id="quirks" placeholder="Back door sticks - lift the handle" style="width:240px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Emergency contacts</h2>
+    <div class="row">
+      <div><label>Name</label><input type="text" id="cName" placeholder="Yael" style="width:130px"></div>
+      <div><label>Phone</label><input type="text" id="cPhone" placeholder="052-111-2222" style="width:140px"></div>
+      <div><label>Role</label><input type="text" id="cRole" placeholder="sister, has a key" style="width:160px"></div>
+      <button id="addContact">Add</button>
+    </div>
+    <div id="contactList" style="color:var(--muted); font-size:14px; margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <h2>This sit</h2>
+    <div class="row">
+      <div><label>First day away</label><input type="date" id="sitStart"></div>
+      <div><label>Back home</label><input type="date" id="sitEnd"></div>
+      <div><label>Sitter's name (optional)</label><input type="text" id="sitterName" placeholder="Dana" style="width:130px"></div>
+      <button id="buildBtn">Build the sheet</button>
+      <button class="ghost" id="printBtn">Print</button>
+    </div>
+  </div>
+
+  <div class="gaps hidden" id="gapsBox"></div>
+  <div class="sheet hidden" id="sheet"></div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+(function(){
+  var E = SitSheetEngine;
+  var profile = { home:{}, pets:[], vet:{}, contacts:[] };
+  try { var saved = JSON.parse(localStorage.getItem('sitsheet') || 'null'); if (saved) profile = saved; } catch(e){}
+  var $ = function(id){ return document.getElementById(id); };
+  function save(){ localStorage.setItem('sitsheet', JSON.stringify(profile)); }
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function pull(){
+    profile.home = { wifiName: $('wifiName').value.trim(), wifiPass: $('wifiPass').value.trim(), trashDay: $('trashDay').value.trim(), quirks: $('quirks').value.trim() };
+    profile.vet = { name: $('vetName').value.trim(), phone: $('vetPhone').value.trim() };
+    profile.plants = $('plants').value.trim();
+  }
+  function push(){
+    $('wifiName').value = profile.home.wifiName || ''; $('wifiPass').value = profile.home.wifiPass || '';
+    $('trashDay').value = profile.home.trashDay || ''; $('quirks').value = profile.home.quirks || '';
+    $('vetName').value = profile.vet.name || ''; $('vetPhone').value = profile.vet.phone || '';
+    $('plants').value = profile.plants || '';
+    renderLists();
+  }
+  function renderLists(){
+    var pl = '';
+    for (var i = 0; i < profile.pets.length; i++) pl += '<div>' + esc(E.petLine(profile.pets[i])) + ' <a href="#" data-pi="' + i + '" style="color:var(--accent)">remove</a></div>';
+    $('petList').innerHTML = pl;
+    var cl = '';
+    for (var j = 0; j < profile.contacts.length; j++){
+      var c = profile.contacts[j];
+      cl += '<div>' + esc(c.name) + ' ' + esc(c.phone || '') + ' ' + esc(c.role ? '(' + c.role + ')' : '') + ' <a href="#" data-ci="' + j + '" style="color:var(--accent)">remove</a></div>';
+    }
+    $('contactList').innerHTML = cl;
+    var links = document.querySelectorAll('#petList a, #contactList a');
+    for (var k = 0; k < links.length; k++){
+      links[k].addEventListener('click', function(ev){
+        ev.preventDefault();
+        pull();
+        if (this.hasAttribute('data-pi')) profile.pets.splice(parseInt(this.getAttribute('data-pi'), 10), 1);
+        else profile.contacts.splice(parseInt(this.getAttribute('data-ci'), 10), 1);
+        save(); renderLists();
+      });
+    }
+  }
+
+  $('addPet').addEventListener('click', function(){
+    var name = $('petName').value.trim();
+    if (!name) return;
+    pull();
+    profile.pets.push({ name: name, kind: $('petKind').value.trim(), feeding: $('petFeeding').value.trim(), meds: $('petMeds').value.trim(), notes: $('petNotes').value.trim() });
+    ['petName','petKind','petFeeding','petMeds','petNotes'].forEach(function(id){ $(id).value = ''; });
+    save(); renderLists();
+  });
+  $('addContact').addEventListener('click', function(){
+    var name = $('cName').value.trim();
+    if (!name) return;
+    pull();
+    profile.contacts.push({ name: name, phone: $('cPhone').value.trim(), role: $('cRole').value.trim() });
+    ['cName','cPhone','cRole'].forEach(function(id){ $(id).value = ''; });
+    save(); renderLists();
+  });
+  $('buildBtn').addEventListener('click', function(){
+    pull(); save();
+    var sit = { startISO: $('sitStart').value, endISO: $('sitEnd').value, sitterName: $('sitterName').value.trim() };
+    var gaps = E.gaps(profile);
+    if (gaps.length){
+      $('gapsBox').classList.remove('hidden');
+      $('gapsBox').innerHTML = 'Before you print:<br>' + gaps.map(esc).join('<br>');
+    } else $('gapsBox').classList.add('hidden');
+    var sections = E.buildSections(profile, sit);
+    var html = '';
+    for (var i = 0; i < sections.length; i++){
+      html += '<h3>' + esc(sections[i].title) + '</h3>';
+      for (var j = 0; j < sections[i].lines.length; j++) html += '<div class="line">' + esc(sections[i].lines[j]) + '</div>';
+    }
+    $('sheet').innerHTML = html;
+    $('sheet').classList.remove('hidden');
+  });
+  $('printBtn').addEventListener('click', function(){ window.print(); });
+
+  push();
+})();
+</script>
+</body>
+</html>
